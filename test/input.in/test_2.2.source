@@ -1,0 +1,35 @@
+-- ========
+-- PROTOCOL
+-- ========
+
+drop external table ossexample;
+create READABLE external table ossexample (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ filepath=oss_reg_test/example.csv id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'csv';
+
+
+create WRITABLE external table ossexample_exp (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ dir=oss_reg_test/expdir/ id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'csv';
+create WRITABLE external table ossexample_exp_prefix (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ prefix=oss_reg_test/expdir_prefix id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'csv';
+create READABLE external table ossexample_imp (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ dir=oss_reg_test/expdir/ id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'csv';
+create READABLE external table ossexample_imp_prefix (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ prefix=oss_reg_test/expdir_prefix id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'csv';
+
+SELECT count(*) FROM ossexample;
+
+insert into ossexample_exp select * from ossexample;
+SELECT count(*) FROM ossexample_imp;
+
+insert into ossexample_exp_prefix select * from ossexample;
+SELECT count(*) FROM ossexample_imp_prefix;
+
+-- =======
+-- CLEANUP
+-- =======
+DROP EXTERNAL TABLE ossexample;
+DROP EXTERNAL TABLE ossexample_exp;
+DROP EXTERNAL TABLE ossexample_exp_prefix;
+DROP EXTERNAL TABLE ossexample_imp;
+DROP EXTERNAL TABLE ossexample_imp_prefix;
+

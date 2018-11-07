@@ -1,0 +1,39 @@
+drop function do_select_3();
+ERROR:  function do_select_3() does not exist
+begin;
+CREATE OR REPLACE FUNCTION do_select_3() RETURNS int AS
+$$
+
+DECLARE
+    count INT;
+
+BEGIN
+    count := 0;
+
+    LOOP
+      count := count + 1; 
+
+      IF count > 1000 THEN
+         RETURN 0;
+      END IF;
+
+      EXECUTE 'select * from tab_for_do limit 1;' ;
+--      EXECUTE 'select * from test' ;
+    END LOOP;
+
+    RETURN 1;
+
+EXCEPTION
+    WHEN OTHERS THEN
+        RAISE EXCEPTION 'Exception occurs for (count %) %', count, sqlerrm;
+END;
+
+$$
+LANGUAGE plpgsql;
+select do_select_3();
+ do_select_3 
+-------------
+           0
+(1 row)
+
+commit;

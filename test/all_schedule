@@ -1,0 +1,18 @@
+test: setup_protocol
+test: setup_tables
+test: test_1.1
+test: test_1.2
+test: test_1.3
+test: test_1.4
+test: test_1.5
+test: test_1.6
+test: test_1.7
+test: test_2.1
+test: test_2.2
+test: test_2.3
+test: test_3.1
+test: test_3.2
+test: test_compress_writer
+#test: loop_1 loop_2 loop_3
+test: cleanup_tables
+test: cleanup_protocol

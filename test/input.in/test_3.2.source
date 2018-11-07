@@ -1,0 +1,51 @@
+-- ========
+-- PROTOCOL
+-- ========
+
+SET client_min_messages TO 'warning';
+
+drop external table ossexamplegz1;
+drop external table ossexamplegz2;
+drop external table ossexamplegz3;
+drop external table ossexamplegz4;
+drop external table ossexamplegz5;
+
+-- Test right case with right gz file and right compressiontype gzip
+create READABLE external table ossexamplegz1 (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ filepath=oss_reg_test/example16.csv.1.gz id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@ compressiontype=gzip') FORMAT 'csv' LOG ERRORS SEGMENT REJECT LIMIT 2;
+
+-- Test right case with error gz file and right compressiontype gzip
+create READABLE external table ossexamplegz2 (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ filepath=oss_reg_test/example16.csv.2.gz id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@ compressiontype=gzip') FORMAT 'csv' LOG ERRORS SEGMENT REJECT LIMIT 2;
+
+-- Test right case with right gz file and wrong compressiontype gz
+create READABLE external table ossexamplegz3 (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ filepath=oss_reg_test/example16.csv.1.gz id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@ compressiontype=gz') FORMAT 'csv' LOG ERRORS SEGMENT REJECT LIMIT 2;
+
+-- Test right case with error gz file dir and right compressiontype gzip
+create READABLE external table ossexamplegz4 (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ dir=oss_reg_test/ id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@ compressiontype=gzip') FORMAT 'csv' LOG ERRORS SEGMENT REJECT LIMIT 2;
+
+-- Test right case with right gz file dir and right compressiontype gzip
+create READABLE external table ossexamplegz5 (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ dir=oss_reg_test/expdir4/ id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@ compressiontype=gzip') FORMAT 'csv' LOG ERRORS SEGMENT REJECT LIMIT 2;
+
+
+
+
+SELECT count(*) FROM ossexamplegz1;
+SELECT count(*) FROM ossexamplegz2;
+SELECT count(*) FROM ossexamplegz3;
+SELECT count(*) FROM ossexamplegz4;
+SELECT count(*) FROM ossexamplegz5;
+
+-- =======
+-- CLEANUP
+-- =======
+DROP EXTERNAL TABLE ossexamplegz1;
+DROP EXTERNAL TABLE ossexamplegz2;
+DROP EXTERNAL TABLE ossexamplegz3;
+DROP EXTERNAL TABLE ossexamplegz4;
+DROP EXTERNAL TABLE ossexamplegz5;
+
+RESET client_min_messages;

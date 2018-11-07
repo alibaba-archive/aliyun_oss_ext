@@ -1,0 +1,65 @@
+-- ========
+-- PROTOCOL
+-- ========
+drop external table ossexample;
+ERROR:  table "ossexample" does not exist
+create READABLE external table ossexample (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ filepath=oss_reg_test/example.csv id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'csv';
+create WRITABLE external table ossexample_exp (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ dir=oss_reg_test/expdir2/ oss_flush_block_size=8 oss_file_max_size=4000 id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'csv';
+create READABLE external table ossexample_imp (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ dir=oss_reg_test/expdir2/ id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'csv';
+SELECT count(*) FROM ossexample;
+NOTICE:  a total of 1 files will be loaded, begin oss_reg_test/example.csv.1, end oss_reg_test/example.csv.1, asyncmode  (seg0 slice1 192.168.0.45:25432 pid=19536)
+CONTEXT:  External table ossexample, file @@oss_host@@ filepath=oss_reg_test/example.csv id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@
+ count 
+-------
+    13
+(1 row)
+
+create WRITABLE external table ossexample_exp_e1 (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ dir=oss_reg_test/expdir2/ oss_flush_block_size=129 oss_file_max_size=4000 id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'csv';
+create WRITABLE external table ossexample_exp_e2 (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ dir=oss_reg_test/expdir2/ oss_flush_block_size=64 oss_file_max_size=32 id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'csv';
+create WRITABLE external table ossexample_exp_e3 (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ dir=oss_reg_test/expdir2/ oss_flush_block_size=8 oss_file_max_size=4001 id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'csv';
+create WRITABLE external table ossexample_exp_e4 (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ filepath=oss_reg_test/expdir2/data oss_flush_block_size=8 oss_file_max_size=4001 id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'csv';
+insert into ossexample_exp_e1 select * from ossexample;
+NOTICE:  a total of 1 files will be loaded, begin oss_reg_test/example.csv.1, end oss_reg_test/example.csv.1, asyncmode  (seg0 slice1 192.168.0.45:25432 pid=19546)
+CONTEXT:  External table ossexample, file @@oss_host@@ filepath=oss_reg_test/example.csv id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@
+ERROR:  flush to oss block size must be between 1 MB to 128 MB (oss_ext.c:1172)  (seg1 192.168.0.45:25433 pid=19537)
+insert into ossexample_exp_e2 select * from ossexample;
+NOTICE:  a total of 1 files will be loaded, begin oss_reg_test/example.csv.1, end oss_reg_test/example.csv.1, asyncmode  (seg0 slice1 192.168.0.45:25432 pid=19546)
+CONTEXT:  External table ossexample, file @@oss_host@@ filepath=oss_reg_test/example.csv id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@
+ERROR:  flush to oss block size must less than oss file max size (oss_ext.c:1196)  (seg0 192.168.0.45:25432 pid=19536)
+insert into ossexample_exp_e3 select * from ossexample;
+NOTICE:  a total of 1 files will be loaded, begin oss_reg_test/example.csv.1, end oss_reg_test/example.csv.1, asyncmode  (seg0 slice1 192.168.0.45:25432 pid=19546)
+CONTEXT:  External table ossexample, file @@oss_host@@ filepath=oss_reg_test/example.csv id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@
+ERROR:  oss file max size 4001 MB must be between 8 MB to 4000 MB (oss_ext.c:1188)  (seg2 192.168.0.45:25434 pid=19538)
+insert into ossexample_exp_e4 select * from ossexample;
+NOTICE:  a total of 1 files will be loaded, begin oss_reg_test/example.csv.1, end oss_reg_test/example.csv.1, asyncmode  (seg0 slice1 192.168.0.45:25432 pid=19546)
+CONTEXT:  External table ossexample, file @@oss_host@@ filepath=oss_reg_test/example.csv id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@
+ERROR:  writeable oss table only supports the export of data to the virtual directory, dir or prefix must be specified (oss_ext.c:1147)  (seg1 192.168.0.45:25433 pid=19537)
+insert into ossexample_exp select * from ossexample;
+NOTICE:  a total of 1 files will be loaded, begin oss_reg_test/example.csv.1, end oss_reg_test/example.csv.1, asyncmode  (seg0 slice1 192.168.0.45:25432 pid=19546)
+CONTEXT:  External table ossexample, file @@oss_host@@ filepath=oss_reg_test/example.csv id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@
+NOTICE:  begin writiing data to oss directory oss_reg_test/expdir2/, with block size 8 MB and oss file size 4000 MB  (seg0 192.168.0.45:25432 pid=19536)
+SELECT count(*) FROM ossexample_imp;
+NOTICE:  a total of 3 files will be loaded, asyncmode  (seg0 slice1 192.168.0.45:25432 pid=19536)
+CONTEXT:  External table ossexample_imp, file @@oss_host@@ dir=oss_reg_test/expdir2/ id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@
+ count 
+-------
+    13
+(1 row)
+
+-- =======
+-- CLEANUP
+-- =======
+DROP EXTERNAL TABLE ossexample;
+DROP EXTERNAL TABLE ossexample_exp;
+DROP EXTERNAL TABLE ossexample_exp_e1;
+DROP EXTERNAL TABLE ossexample_exp_e2;
+DROP EXTERNAL TABLE ossexample_exp_e3;
+DROP EXTERNAL TABLE ossexample_exp_e4;
+DROP EXTERNAL TABLE ossexample_imp;

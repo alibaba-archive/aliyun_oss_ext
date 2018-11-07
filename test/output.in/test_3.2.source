@@ -1,0 +1,59 @@
+-- ========
+-- PROTOCOL
+-- ========
+SET client_min_messages TO 'warning';
+drop external table ossexamplegz1;
+ERROR:  table "ossexamplegz1" does not exist
+drop external table ossexamplegz2;
+ERROR:  table "ossexamplegz2" does not exist
+drop external table ossexamplegz3;
+ERROR:  table "ossexamplegz3" does not exist
+drop external table ossexamplegz4;
+ERROR:  table "ossexamplegz4" does not exist
+drop external table ossexamplegz5;
+ERROR:  table "ossexamplegz5" does not exist
+-- Test right case with right gz file and right compressiontype gzip
+create READABLE external table ossexamplegz1 (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ filepath=oss_reg_test/example16.csv.1.gz id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@ compressiontype=gzip') FORMAT 'csv' LOG ERRORS SEGMENT REJECT LIMIT 2;
+-- Test right case with error gz file and right compressiontype gzip
+create READABLE external table ossexamplegz2 (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ filepath=oss_reg_test/example16.csv.2.gz id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@ compressiontype=gzip') FORMAT 'csv' LOG ERRORS SEGMENT REJECT LIMIT 2;
+-- Test right case with right gz file and wrong compressiontype gz
+create READABLE external table ossexamplegz3 (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ filepath=oss_reg_test/example16.csv.1.gz id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@ compressiontype=gz') FORMAT 'csv' LOG ERRORS SEGMENT REJECT LIMIT 2;
+-- Test right case with error gz file dir and right compressiontype gzip
+create READABLE external table ossexamplegz4 (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ dir=oss_reg_test/ id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@ compressiontype=gzip') FORMAT 'csv' LOG ERRORS SEGMENT REJECT LIMIT 2;
+-- Test right case with right gz file dir and right compressiontype gzip
+create READABLE external table ossexamplegz5 (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ dir=oss_reg_test/expdir4/ id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@ compressiontype=gzip') FORMAT 'csv' LOG ERRORS SEGMENT REJECT LIMIT 2;
+SELECT count(*) FROM ossexamplegz1;
+ count 
+-------
+    12
+(1 row)
+
+SELECT count(*) FROM ossexamplegz2;
+ERROR:  Failed to decompress data: -3 (oss_ext.c:541)  (seg0 slice1 192.168.0.45:25432 pid=20160)
+DETAIL:  External table ossexamplegz2, file @@oss_host@@ filepath=oss_reg_test/example16.csv.2.gz id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@ compressiontype=gzip
+SELECT count(*) FROM ossexamplegz3;
+ERROR:  unknown compression type gz (oss_ext.c:1064)  (seg0 slice1 192.168.0.45:25432 pid=20160)
+DETAIL:  External table ossexamplegz3, file @@oss_host@@ filepath=oss_reg_test/example16.csv.1.gz id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@ compressiontype=gz
+SELECT count(*) FROM ossexamplegz4;
+ERROR:  Failed to decompress data: -3 (oss_ext.c:541)  (seg0 slice1 192.168.0.45:25432 pid=20160)
+DETAIL:  External table ossexamplegz4, file @@oss_host@@ dir=oss_reg_test/ id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@ compressiontype=gzip
+SELECT count(*) FROM ossexamplegz5;
+ count 
+-------
+    12
+(1 row)
+
+-- =======
+-- CLEANUP
+-- =======
+DROP EXTERNAL TABLE ossexamplegz1;
+DROP EXTERNAL TABLE ossexamplegz2;
+DROP EXTERNAL TABLE ossexamplegz3;
+DROP EXTERNAL TABLE ossexamplegz4;
+DROP EXTERNAL TABLE ossexamplegz5;
+RESET client_min_messages;

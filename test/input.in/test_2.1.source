@@ -1,0 +1,126 @@
+-- start_matchsubs
+--
+-- m/CONTEXT/
+-- s/key=[A-Z0-9a-z\_]*[ \t\n]/key=MD5 /
+-- s/key=[A-Z0-9a-z_]*$/key=MD5 /
+--
+-- m/DETAIL/
+-- s/key=[A-Z0-9a-z\_]*[ \t\n]/key=MD5 /
+-- s/key=[A-Z0-9a-z_]*$/key=MD5 /
+--
+-- m/CONTEXT/
+-- s/id=[A-Z0-9a-z\_]*[ \t\n]/id=MD5 /
+-- s/id=[A-Z0-9a-z_]*$/id=MD5 /
+--
+-- m/DETAIL/
+-- s/id=[A-Z0-9a-z\_]*[ \t\n]/id=MD5 /
+-- s/id=[A-Z0-9a-z_]*$/id=MD5 /
+--
+-- m/ERROR/
+-- s/\(.*:.*\)/()/
+--
+-- m/WARNING/
+-- s/(.*:.*)//
+--
+-- m/NOTICE/
+-- s/(.*:.*)//
+--
+-- end_matchsubs
+
+-- ========
+-- PROTOCOL
+-- ========
+
+-- Test normal case
+drop external table ossexample;
+create READABLE external table ossexample (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ filepath=oss_reg_test/example.csv id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'csv';
+select count(*) from ossexample;
+
+-- Test wrong order of params
+drop external table ossexample;
+create READABLE external table ossexample (date text, time text, open float, high float,
+        low float, volume int) location('filepath=oss_reg_test/example.csv @@oss_host@@ filepath=oss_reg_test/example.csv id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'csv';
+select count(*) from ossexample;
+
+-- Test different order of params
+drop external table ossexample;
+create READABLE external table ossexample (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ filepath=oss_reg_test/example.csv id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'csv';
+select count(*) from ossexample;
+
+-- TEST spaces before oss://
+drop external table ossexample;
+create READABLE external table ossexample (date text, time text, open float, high float,
+        low float, volume int) location(' @@oss_host@@ filepath=oss_reg_test/example.csv id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'csv';
+select count(*) from ossexample;
+
+-- Test filename param
+drop external table ossexample;
+create READABLE external table ossexample (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ filename=oss_reg_test/example.csv id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'csv';
+select count(*) from ossexample;
+
+-- Test error path
+drop external table ossexample;
+create READABLE external table ossexample (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ filepath=NOT_EXISTS_oss_reg_test/example.csv id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'csv';
+select count(*) from ossexample;
+
+-- Test no id param
+drop external table ossexample;
+create READABLE external table ossexample (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ filepath=oss_reg_test/example.csv key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'csv';
+select count(*) from ossexample;
+
+-- Test wrong id
+drop external table ossexample;
+create READABLE external table ossexample (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ filepath=oss_reg_test/example.csv id=WRONG_ID key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'csv';
+select count(*) from ossexample;
+
+-- Test wrong key
+drop external table ossexample;
+create READABLE external table ossexample (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ filepath=oss_reg_test/example.csv id=@@oss_id@@ key=WRONG_KEY bucket=@@oss_bucket@@') FORMAT 'csv';
+select count(*) from ossexample;
+
+-- Test wrong bucket
+drop external table ossexample;
+create READABLE external table ossexample (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ filepath=oss_reg_test/example.csv id=@@oss_id@@ key=WRONG_KEY bucket=000000') FORMAT 'csv';
+select count(*) from ossexample;
+
+-- Test no bucket param
+drop external table ossexample;
+create READABLE external table ossexample (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ filepath=oss_reg_test/example.csv id=@@oss_id@@ key=WRONG_KEY ') FORMAT 'csv';
+select count(*) from ossexample;
+
+-- Test wrong last param
+drop external table ossexample;
+create READABLE external table ossexample (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ filepath=oss_reg_test/example.csv id=@@oss_id@@ key=WRONG_KEY bucket=') FORMAT 'csv';
+select count(*) from ossexample;
+
+-- Test with \t
+drop external table ossexample;
+create READABLE external table ossexample (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ 	filepath=oss_reg_test/example.csv id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'csv';
+select count(*) from ossexample;
+
+-- Test with multi spaces among params
+drop external table ossexample;
+create READABLE external table ossexample (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ filepath=oss_reg_test/example.csv              id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'csv';
+select count(*) from ossexample;
+
+--SELECT count(*) FROM ossexample;
+--SELECT sum(open) FROM ossexample;
+--SELECT avg(open) FROM ossexample;
+
+-- =======
+-- CLEANUP
+-- =======
+DROP EXTERNAL TABLE ossexample;
+

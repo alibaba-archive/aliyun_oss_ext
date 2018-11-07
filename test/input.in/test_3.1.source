@@ -1,0 +1,151 @@
+-- ========
+-- PROTOCOL
+-- ========
+
+SET client_min_messages TO 'warning';
+
+drop external table ossexample1;
+create READABLE external table ossexample1 (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ filepath=oss_reg_test/example1.csv.1 id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'csv' (DELIMITER '\t');
+
+create READABLE external table ossexample5 (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ filepath=oss_reg_test/example5.txt.1 id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'text' (DELIMITER '\t');
+
+create READABLE external table ossexample1_e (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ filepath=oss_reg_test/example1.csv.1 id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'csv' (DELIMITER E'\t');
+
+create READABLE external table ossexample5_e (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ filepath=oss_reg_test/example5.txt.1 id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'text' (DELIMITER E'\t');
+
+create READABLE external table ossexample6_switch_row (volume int) location('@@oss_host@@ filepath=oss_reg_test/example6.csv.1 id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'csv' (DELIMITER '\n');
+
+create READABLE external table ossexample7_switch_row (volume int) location('@@oss_host@@ filepath=oss_reg_test/example7.txt.1 id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'text' (DELIMITER '\n');
+
+create READABLE external table ossexample6_switch_row_e (volume int) location('@@oss_host@@ filepath=oss_reg_test/example6.csv.1 id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'csv' (DELIMITER E'\n');
+
+create READABLE external table ossexample7_switch_row_e (volume int) location('@@oss_host@@ filepath=oss_reg_test/example7.txt.1 id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'text' (DELIMITER E'\n');
+
+create READABLE external table ossexample8_many_chars_e (volume int) location('@@oss_host@@ filepath=oss_reg_test/example8.csv.1 id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'csv' (DELIMITER E'nnn');
+
+create READABLE external table ossexample9_many_chars_e (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ filepath=oss_reg_test/example9.txt.1 id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'text' (DELIMITER E'nnn');
+
+create READABLE external table ossexample8_many_chars (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ filepath=oss_reg_test/example8.csv.1 id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'csv' (DELIMITER 'nnn');
+
+create READABLE external table ossexample9_many_chars (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ filepath=oss_reg_test/example9.txt.1 id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'text' (DELIMITER 'nnn');
+
+create READABLE external table ossexample10_backslash  (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ filepath=oss_reg_test/example10.csv.1 id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'csv' (DELIMITER '/');
+
+create READABLE external table ossexample10_backslash_e  (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ filepath=oss_reg_test/example10.csv.1 id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'csv' (DELIMITER E'//');
+
+create READABLE external table ossexample11_backslash  (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ filepath=oss_reg_test/example11.txt.1 id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'text' (DELIMITER '/');
+
+create READABLE external table ossexample11_backslash_e  (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ filepath=oss_reg_test/example11.txt.1 id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'text' (DELIMITER E'//');
+
+SELECT count(*) FROM ossexample1;
+SELECT count(*) FROM ossexample5;
+
+create WRITABLE external table ossexample_csv_tab (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ dir=oss_reg_test/expdir3/ oss_flush_block_size=8 oss_file_max_size=4000 id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'csv' (DELIMITER '\t');
+create READABLE external table ossexample_csv_tab_imp (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ dir=oss_reg_test/expdir3/ id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'csv' (DELIMITER '\t');
+
+create WRITABLE external table ossexample_txt_tab (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ dir=oss_reg_test/expdir3/ oss_flush_block_size=8 oss_file_max_size=4000 id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'text' (DELIMITER '\t');
+create READABLE external table ossexample_txt_tab_imp (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ dir=oss_reg_test/expdir3/ id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'text' (DELIMITER '\t');
+
+create WRITABLE external table ossexample_csv_tab_e (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ dir=oss_reg_test/expdir3/ oss_flush_block_size=8 oss_file_max_size=4000 id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'csv' (DELIMITER E'\t');
+
+create WRITABLE external table ossexample_txt_tab_e (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ dir=oss_reg_test/expdir3/ oss_flush_block_size=8 oss_file_max_size=4000 id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'text' (DELIMITER E'\t');
+
+create WRITABLE external table ossexample_csv_switch_row (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ dir=oss_reg_test/expdir3/ oss_flush_block_size=8 oss_file_max_size=4000 id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'csv' (DELIMITER '\n');
+
+create WRITABLE external table ossexample_txt_switch_row (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ dir=oss_reg_test/expdir3/ oss_flush_block_size=8 oss_file_max_size=4000 id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'text' (DELIMITER '\n');
+
+create WRITABLE external table ossexample_csv_switch_row_e (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ dir=oss_reg_test/expdir3/ oss_flush_block_size=8 oss_file_max_size=4000 id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'csv' (DELIMITER E'\n');
+
+create WRITABLE external table ossexample_txt_switch_row_e (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ dir=oss_reg_test/expdir3/ oss_flush_block_size=8 oss_file_max_size=4000 id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'text' (DELIMITER E'\n');
+
+create WRITABLE external table ossexample_csv_many_chars (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ dir=oss_reg_test/expdir3/ oss_flush_block_size=8 oss_file_max_size=4000 id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'csv' (DELIMITER 'mmm');
+
+create WRITABLE external table ossexample_txt_many_chars (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ dir=oss_reg_test/expdir3/ oss_flush_block_size=8 oss_file_max_size=4000 id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'text' (DELIMITER 'mmms');
+
+create WRITABLE external table ossexample_csv_many_chars_e (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ dir=oss_reg_test/expdir3/ oss_flush_block_size=8 oss_file_max_size=4000 id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'csv' (DELIMITER E'mmm');
+
+create WRITABLE external table ossexample_txt_many_chars_e (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ dir=oss_reg_test/expdir3/ oss_flush_block_size=8 oss_file_max_size=4000 id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'text' (DELIMITER E'mmms');
+
+create WRITABLE external table ossexample_csv_backslash (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ dir=oss_reg_test/expdir3/ oss_flush_block_size=8 oss_file_max_size=4000 id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'csv' (DELIMITER '/');
+
+create WRITABLE external table ossexample_txt_backslash (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ dir=oss_reg_test/expdir3/ oss_flush_block_size=8 oss_file_max_size=4000 id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'text' (DELIMITER '/');
+
+create WRITABLE external table ossexample_csv_backslash_e (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ dir=oss_reg_test/expdir3/ oss_flush_block_size=8 oss_file_max_size=4000 id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'csv' (DELIMITER E'//');
+
+create WRITABLE external table ossexample_txt_backslash_e (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ dir=oss_reg_test/expdir3/ oss_flush_block_size=8 oss_file_max_size=4000 id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'text' (DELIMITER E'//');
+
+insert into ossexample_csv_tab select * from ossexample1;
+insert into ossexample_txt_tab select * from ossexample5;
+SELECT count(*) FROM ossexample_csv_tab_imp;
+SELECT count(*) FROM ossexample_txt_tab_imp;
+
+-- =======
+-- CLEANUP
+-- =======
+DROP EXTERNAL TABLE ossexample1;
+DROP EXTERNAL TABLE ossexample5;
+DROP EXTERNAL TABLE ossexample1_e;
+DROP EXTERNAL TABLE ossexample5_e;
+DROP EXTERNAL TABLE ossexample6_switch_row;
+DROP EXTERNAL TABLE ossexample7_switch_row;
+DROP EXTERNAL TABLE ossexample6_switch_row_e;
+DROP EXTERNAL TABLE ossexample7_switch_row_e;
+DROP EXTERNAL TABLE ossexample8_many_chars_e;
+DROP EXTERNAL TABLE ossexample9_many_chars_e;
+DROP EXTERNAL TABLE ossexample8_many_chars;
+DROP EXTERNAL TABLE ossexample9_many_chars;
+DROP EXTERNAL TABLE ossexample10_backslash;
+DROP EXTERNAL TABLE ossexample11_backslash;
+DROP EXTERNAL TABLE ossexample10_backslash_e;
+DROP EXTERNAL TABLE ossexample11_backslash_e;
+DROP EXTERNAL TABLE ossexample_csv_tab_imp;
+DROP EXTERNAL TABLE ossexample_txt_tab_imp;
+
+
+DROP EXTERNAL TABLE ossexample_csv_tab;
+DROP EXTERNAL TABLE ossexample_txt_tab;
+DROP EXTERNAL TABLE ossexample_csv_tab_e;
+DROP EXTERNAL TABLE ossexample_txt_tab_e;
+DROP EXTERNAL TABLE ossexample_csv_switch_row;
+DROP EXTERNAL TABLE ossexample_txt_switch_row;
+DROP EXTERNAL TABLE ossexample_csv_switch_row_e;
+DROP EXTERNAL TABLE ossexample_txt_switch_row_e;
+DROP EXTERNAL TABLE ossexample_csv_many_chars;
+DROP EXTERNAL TABLE ossexample_txt_many_chars;
+DROP EXTERNAL TABLE ossexample_csv_many_chars_e;
+DROP EXTERNAL TABLE ossexample_txt_many_chars_e;
+DROP EXTERNAL TABLE ossexample_csv_backslash;
+DROP EXTERNAL TABLE ossexample_txt_backslash;
+DROP EXTERNAL TABLE ossexample_csv_backslash_e;
+DROP EXTERNAL TABLE ossexample_txt_backslash_e;
+
+RESET client_min_messages;

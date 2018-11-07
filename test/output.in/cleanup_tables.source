@@ -1,0 +1,4 @@
+-- start_ignore
+drop external table tab_for_do;
+ERROR:  table "tab_for_do" does not exist
+-- end_ignore

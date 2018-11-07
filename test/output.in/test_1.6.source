@@ -1,0 +1,20 @@
+-- ========
+-- PROTOCOL
+-- ========
+drop external table ossexample16;
+ERROR:  table "ossexample16" does not exist
+create READABLE external table ossexample16 (date text, time text, open float, high float,
+	low float, volume int) location('@@oss_host@@ filepath=oss_reg_test/example16.csv id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@') format 'csv'  (HEADER);
+NOTICE:  HEADER means that each one of the data files has a header row.
+SELECT count(*) FROM ossexample16;
+NOTICE:  a total of 1 files will be loaded, begin oss_reg_test/example16.csv.1, end oss_reg_test/example16.csv.1, asyncmode  (seg0 slice1 e010101082048.zmf:25432 pid=542)
+CONTEXT:  External table ossexample16, file @@oss_host@@ filepath=oss_reg_test/example16.csv id=@@oss_id_MD5@@ key=@@oss_key_MD5@@ bucket=@@oss_bucket@@
+ count 
+-------
+    12
+(1 row)
+
+-- =======
+-- CLEANUP
+-- =======
+DROP EXTERNAL TABLE ossexample16;

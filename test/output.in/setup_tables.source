@@ -1,0 +1,4 @@
+drop external table tab_for_do;
+ERROR:  table "tab_for_do" does not exist
+create READABLE external table tab_for_do (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ filepath=oss_reg_test/example.csv.1 id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'csv';

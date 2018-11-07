@@ -1,0 +1,3 @@
+-- start_ignore
+drop external table tab_for_do;
+-- end_ignore

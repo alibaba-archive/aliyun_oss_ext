@@ -1,0 +1,29 @@
+-- ========
+-- PROTOCOL
+-- ========
+
+
+drop table example17;
+create table example17 (id serial, name text) distributed by (id);
+insert into example17 (name) values ('ssf');
+insert into example17 (name) values ('abc');
+insert into example17 (name) values ('deefe3');
+insert into example17 (name) values ('e90jg');
+insert into example17 (name) values ('br t34');
+insert into example17 (name) values ('3r3r');
+insert into example17 (name) values ('ccfee4');
+insert into example17 (name) values ('hbafe');
+
+-- create the external table with this protocol:
+CREATE READABLE EXTERNAL TABLE ext_r(like example17)
+    LOCATION('@@oss_host@@ filepath=oss_reg_test/example17.csv id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@')
+FORMAT 'text' ( DELIMITER ',');
+
+
+SELECT * FROM ext_r;
+
+-- =======
+-- CLEANUP
+-- =======
+DROP EXTERNAL TABLE ext_r;
+

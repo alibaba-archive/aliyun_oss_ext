@@ -1,0 +1,49 @@
+-- ========
+-- PROTOCOL
+-- ========
+
+
+DROP EXTERNAL TABLE kfossext;
+CREATE READABLE EXTERNAL TABLE kfossext (
+    name text,
+    cardno text,
+    descriot text,
+    ctftp text,
+    ctfid text,
+    gender text,
+    birthday text,
+    address text,
+    zip text,
+    dirty text,
+    district1 text,
+    district2 text,
+    district3 text,
+    district4 text,
+    district5 text,
+    district6 text,
+    firstnm text,
+    lastnm text,
+    duty text,
+    mobile text,
+    tel text,
+    fax text,
+    email text,
+    nation text,
+    taste text,
+    education text,
+    company text,
+    ctel text,
+    caddress text,
+    czip text,
+    family text,
+    version text,
+    id text
+) LOCATION('@@oss_host@@ filepath=oss_reg_test/kf.csv id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'CSV' (HEADER) ENCODING 'UTF8' LOG ERRORS SEGMENT REJECT LIMIT 50;
+
+select count(*) from kfossext;
+
+-- =======
+-- CLEANUP
+-- =======
+DROP EXTERNAL TABLE kfossext;
+

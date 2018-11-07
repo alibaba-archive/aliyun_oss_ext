@@ -1,0 +1,17 @@
+-- ========
+-- PROTOCOL
+-- ========
+
+drop external table ossexample;
+create READABLE external table ossexample (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ filepath=oss_reg_test/example.csv id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'csv';
+
+SELECT count(*) FROM ossexample;
+SELECT sum(open) FROM ossexample;
+SELECT avg(open) FROM ossexample;
+
+-- =======
+-- CLEANUP
+-- =======
+DROP EXTERNAL TABLE ossexample;
+

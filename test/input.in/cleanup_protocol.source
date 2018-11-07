@@ -1,0 +1,5 @@
+-- start_ignore
+DROP extension if exists oss_ext cascade;
+-- end_ignore
+
+

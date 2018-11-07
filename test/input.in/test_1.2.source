@@ -1,0 +1,17 @@
+-- ========
+-- PROTOCOL
+-- ========
+
+
+drop external table ossexample2;
+create READABLE external table ossexample2 (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ filepath=oss_reg_test/example2.txt id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'text' ( DELIMITER ',' NULL '') LOG ERRORS SEGMENT REJECT LIMIT 5;
+
+SELECT count(*) FROM ossexample2;
+SELECT gp_read_error_log('ossexample2');
+
+-- =======
+-- CLEANUP
+-- =======
+DROP EXTERNAL TABLE ossexample2;
+

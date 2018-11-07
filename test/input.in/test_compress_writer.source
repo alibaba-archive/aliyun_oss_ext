@@ -1,0 +1,37 @@
+-- ========
+-- PROTOCOL
+-- ========
+
+SET client_min_messages TO 'warning';
+
+DROP EXTERNAL TABLE ossexamplegz1;
+DROP EXTERNAL TABLE oss_gzip_writer;
+DROP EXTERNAL TABLE oss_gzip_reader;
+
+create READABLE external table ossexamplegz1 (date text, time text, open float, high float,
+        low float, volume int) 
+location('@@oss_host@@ filepath=oss_reg_test/example16.csv.1.gz id=@@oss_id@@ key= @@oss_key@@ bucket=@@oss_bucket@@ compressiontype=gzip') FORMAT 'csv' LOG ERRORS SEGMENT REJECT LIMIT 2;
+
+create WRITABLE EXTERNAL table oss_gzip_writer (date text, time text, open float, high float,
+        low float, volume int) 
+LOCATION('@@oss_host@@ async=t prefix=oss_reg_test2/datagz id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@ compressiontype=gzip')
+FORMAT 'TEXT' (DELIMITER E'\t' NULL '')
+DISTRIBUTED BY (date);
+
+create READABLE  EXTERNAL table oss_gzip_reader (date text, time text, open float, high float,
+        low float, volume int) 
+LOCATION('@@oss_host@@ async=t dir= oss_reg_test2/ id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@ compressiontype=gzip')
+FORMAT 'TEXT' (DELIMITER E'\t' NULL '');
+
+SELECT count(*) FROM ossexamplegz1;
+insert into oss_gzip_writer SELECT * FROM ossexamplegz1;
+SELECT count(*) FROM oss_gzip_reader;
+
+-- =======
+-- CLEANUP
+-- =======
+DROP EXTERNAL TABLE ossexamplegz1;
+DROP EXTERNAL TABLE oss_gzip_writer;
+DROP EXTERNAL TABLE oss_gzip_reader;
+
+RESET client_min_messages;

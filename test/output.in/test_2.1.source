@@ -1,0 +1,186 @@
+-- start_matchsubs
+--
+-- m/CONTEXT/
+-- s/key=[A-Z0-9a-z\_]*[ \t\n]/key=MD5 /
+-- s/key=[A-Z0-9a-z_]*$/key=MD5 /
+--
+-- m/DETAIL/
+-- s/key=[A-Z0-9a-z\_]*[ \t\n]/key=MD5 /
+-- s/key=[A-Z0-9a-z_]*$/key=MD5 /
+--
+-- m/CONTEXT/
+-- s/id=[A-Z0-9a-z\_]*[ \t\n]/id=MD5 /
+-- s/id=[A-Z0-9a-z_]*$/id=MD5 /
+--
+-- m/DETAIL/
+-- s/id=[A-Z0-9a-z\_]*[ \t\n]/id=MD5 /
+-- s/id=[A-Z0-9a-z_]*$/id=MD5 /
+--
+-- m/ERROR/
+-- s/\(.*:.*\)/()/
+--
+-- m/WARNING/
+-- s/(.*:.*)//
+--
+-- m/NOTICE/
+-- s/(.*:.*)//
+--
+-- end_matchsubs
+-- ========
+-- PROTOCOL
+-- ========
+-- Test normal case
+drop external table ossexample;
+ERROR:  table "ossexample" does not exist
+create READABLE external table ossexample (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ filepath=oss_reg_test/example.csv id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'csv';
+select count(*) from ossexample;
+NOTICE:  a total of 1 files will be loaded, begin oss_reg_test/example.csv.1, end oss_reg_test/example.csv.1, asyncmode  (seg0 slice1 192.168.0.45:25432 pid=12539)
+CONTEXT:  External table ossexample, file @@oss_host@@ filepath=oss_reg_test/example.csv id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@
+ count 
+-------
+    13
+(1 row)
+
+-- Test wrong order of params
+drop external table ossexample;
+create READABLE external table ossexample (date text, time text, open float, high float,
+        low float, volume int) location('filepath=oss_reg_test/example.csv @@oss_host@@ filepath=oss_reg_test/example.csv id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'csv';
+ERROR:  protocol "filepath=oss_reg_test/example.csv oss" does not exist
+select count(*) from ossexample;
+ERROR:  relation "ossexample" does not exist
+LINE 1: select count(*) from ossexample;
+                             ^
+-- Test different order of params
+drop external table ossexample;
+ERROR:  table "ossexample" does not exist
+create READABLE external table ossexample (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ filepath=oss_reg_test/example.csv id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'csv';
+select count(*) from ossexample;
+NOTICE:  a total of 1 files will be loaded, begin oss_reg_test/example.csv.1, end oss_reg_test/example.csv.1, asyncmode  (seg0 slice1 192.168.0.45:25432 pid=12539)
+CONTEXT:  External table ossexample, file @@oss_host@@ filepath=oss_reg_test/example.csv id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@
+ count 
+-------
+    13
+(1 row)
+
+-- TEST spaces before oss://
+drop external table ossexample;
+create READABLE external table ossexample (date text, time text, open float, high float,
+        low float, volume int) location(' @@oss_host@@ filepath=oss_reg_test/example.csv id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'csv';
+ERROR:  protocol " oss" does not exist
+select count(*) from ossexample;
+ERROR:  relation "ossexample" does not exist
+LINE 1: select count(*) from ossexample;
+                             ^
+-- Test filename param
+drop external table ossexample;
+ERROR:  table "ossexample" does not exist
+create READABLE external table ossexample (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ filename=oss_reg_test/example.csv id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'csv';
+select count(*) from ossexample;
+ERROR:  you must specify the parameter dir or filepath or prefix (oss_ext.c:1080)  (seg0 slice1 192.168.0.45:25432 pid=12539) (cdbdisp.c:254)
+DETAIL:  External table ossexample, file @@oss_host@@ filename=oss_reg_test/example.csv id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@
+-- Test error path
+drop external table ossexample;
+create READABLE external table ossexample (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ filepath=NOT_EXISTS_oss_reg_test/example.csv id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'csv';
+select count(*) from ossexample;
+WARNING:  does not match any file in oss  (seg0 slice1 192.168.0.45:25432 pid=12539)
+CONTEXT:  External table ossexample, file @@oss_host@@ filepath=NOT_EXISTS_oss_reg_test/example.csv id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@
+ count 
+-------
+     0
+(1 row)
+
+-- Test no id param
+drop external table ossexample;
+create READABLE external table ossexample (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ filepath=oss_reg_test/example.csv key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'csv';
+select count(*) from ossexample;
+ERROR:  invalid location uri "@@oss_host@@ filepath=oss_reg_test/example.csv key=@@oss_key@@ bucket=@@oss_bucket@@", no key or id  (seg0 slice1 192.168.0.45:25432 pid=12539)
+DETAIL:  External table ossexample, file @@oss_host@@ filepath=oss_reg_test/example.csv key=@@oss_key@@ bucket=@@oss_bucket@@
+-- Test wrong id
+drop external table ossexample;
+create READABLE external table ossexample (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ filepath=oss_reg_test/example.csv id=WRONG_ID key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'csv';
+select count(*) from ossexample;
+WARNING:  object oss_reg_test/example.csv oss_head_object failed: code 403 error_code UnknownError error_msg unknown req_id 5BDBB5C685EA7E3731C78122, retry 0/30  (seg0 slice1 192.168.0.45:25432 pid=12539)
+CONTEXT:  External table ossexample, file @@oss_host@@ filepath=oss_reg_test/example.csv id=WRONG_ID key=@@oss_key@@ bucket=@@oss_bucket@@
+WARNING:  object oss_reg_test/example.csv oss_head_object failed: code 403 error_code UnknownError error_msg unknown req_id 5BDBB5C6E44F52C8AC39CD99, retry 0/30  (seg1 slice1 192.168.0.45:25433 pid=12540)
+CONTEXT:  External table ossexample, file @@oss_host@@ filepath=oss_reg_test/example.csv id=WRONG_ID key=@@oss_key@@ bucket=@@oss_bucket@@
+WARNING:  object oss_reg_test/example.csv oss_head_object failed: code 403 error_code UnknownError error_msg unknown req_id 5BDBB5C63DD124406ACB7C7E, retry 0/30  (seg2 slice1 192.168.0.45:25434 pid=12541)
+CONTEXT:  External table ossexample, file @@oss_host@@ filepath=oss_reg_test/example.csv id=WRONG_ID key=@@oss_key@@ bucket=@@oss_bucket@@
+ERROR:  ossapi oss_head_object call failure (ossapi.c:148)  (seg0 slice1 192.168.0.45:25432 pid=12539) (cdbdisp.c:254)
+DETAIL:  External table ossexample, file @@oss_host@@ filepath=oss_reg_test/example.csv id=WRONG_ID key=@@oss_key@@ bucket=@@oss_bucket@@
+-- Test wrong key
+drop external table ossexample;
+create READABLE external table ossexample (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ filepath=oss_reg_test/example.csv id=@@oss_id@@ key=WRONG_KEY bucket=@@oss_bucket@@') FORMAT 'csv';
+select count(*) from ossexample;
+WARNING:  object oss_reg_test/example.csv oss_head_object failed: code 403 error_code UnknownError error_msg unknown req_id 5BDBB5C785EA7E3731C78421, retry 0/30  (seg0 slice1 192.168.0.45:25432 pid=12539)
+CONTEXT:  External table ossexample, file @@oss_host@@ filepath=oss_reg_test/example.csv id=@@oss_id@@ key=WRONG_KEY bucket=@@oss_bucket@@
+WARNING:  object oss_reg_test/example.csv oss_head_object failed: code 403 error_code UnknownError error_msg unknown req_id 5BDBB5C7E44F52C8AC39D0A0, retry 0/30  (seg1 slice1 192.168.0.45:25433 pid=12540)
+CONTEXT:  External table ossexample, file @@oss_host@@ filepath=oss_reg_test/example.csv id=@@oss_id@@ key=WRONG_KEY bucket=@@oss_bucket@@
+WARNING:  object oss_reg_test/example.csv oss_head_object failed: code 403 error_code UnknownError error_msg unknown req_id 5BDBB5C73DD124406ACB7F4E, retry 0/30  (seg2 slice1 192.168.0.45:25434 pid=12541)
+CONTEXT:  External table ossexample, file @@oss_host@@ filepath=oss_reg_test/example.csv id=@@oss_id@@ key=WRONG_KEY bucket=@@oss_bucket@@
+ERROR:  ossapi oss_head_object call failure (ossapi.c:148)  (seg0 slice1 192.168.0.45:25432 pid=12539) (cdbdisp.c:254)
+DETAIL:  External table ossexample, file @@oss_host@@ filepath=oss_reg_test/example.csv id=@@oss_id@@ key=WRONG_KEY bucket=@@oss_bucket@@
+-- Test wrong bucket
+drop external table ossexample;
+create READABLE external table ossexample (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ filepath=oss_reg_test/example.csv id=@@oss_id@@ key=WRONG_KEY bucket=000000') FORMAT 'csv';
+select count(*) from ossexample;
+WARNING:  object oss_reg_test/example.csv oss_head_object failed: code 403 error_code UnknownError error_msg unknown req_id 5BDBB5C79D2B0CB070965529, retry 0/30  (seg0 slice1 192.168.0.45:25432 pid=12539)
+CONTEXT:  External table ossexample, file @@oss_host@@ filepath=oss_reg_test/example.csv id=@@oss_id@@ key=WRONG_KEY bucket=000000
+WARNING:  object oss_reg_test/example.csv oss_head_object failed: code 403 error_code UnknownError error_msg unknown req_id 5BDBB5C704321E694E45CB88, retry 0/30  (seg1 slice1 192.168.0.45:25433 pid=12540)
+CONTEXT:  External table ossexample, file @@oss_host@@ filepath=oss_reg_test/example.csv id=@@oss_id@@ key=WRONG_KEY bucket=000000
+WARNING:  object oss_reg_test/example.csv oss_head_object failed: code 403 error_code UnknownError error_msg unknown req_id 5BDBB5C7B03BCC74E7CD892A, retry 0/30  (seg2 slice1 192.168.0.45:25434 pid=12541)
+CONTEXT:  External table ossexample, file @@oss_host@@ filepath=oss_reg_test/example.csv id=@@oss_id@@ key=WRONG_KEY bucket=000000
+ERROR:  ossapi oss_head_object call failure (ossapi.c:148)  (seg0 slice1 192.168.0.45:25432 pid=12539) (cdbdisp.c:254)
+DETAIL:  External table ossexample, file @@oss_host@@ filepath=oss_reg_test/example.csv id=@@oss_id@@ key=WRONG_KEY bucket=000000
+-- Test no bucket param
+drop external table ossexample;
+create READABLE external table ossexample (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ filepath=oss_reg_test/example.csv id=@@oss_id@@ key=WRONG_KEY ') FORMAT 'csv';
+select count(*) from ossexample;
+ERROR:  you must specify host,id,key,bucket at the same time (oss_ext.c:1093)  (seg0 slice1 192.168.0.45:25432 pid=12539) (cdbdisp.c:254)
+DETAIL:  External table ossexample, file @@oss_host@@ filepath=oss_reg_test/example.csv id=@@oss_id@@ key=WRONG_KEY
+-- Test wrong last param
+drop external table ossexample;
+create READABLE external table ossexample (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ filepath=oss_reg_test/example.csv id=@@oss_id@@ key=WRONG_KEY bucket=') FORMAT 'csv';
+select count(*) from ossexample;
+ERROR:  you must specify host,id,key,bucket at the same time (oss_ext.c:1093)  (seg0 slice1 192.168.0.45:25432 pid=12539) (cdbdisp.c:254)
+DETAIL:  External table ossexample, file @@oss_host@@ filepath=oss_reg_test/example.csv id=@@oss_id@@ key=WRONG_KEY bucket=
+-- Test with \t
+drop external table ossexample;
+create READABLE external table ossexample (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ 	filepath=oss_reg_test/example.csv id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'csv';
+select count(*) from ossexample;
+NOTICE:  a total of 1 files will be loaded, begin oss_reg_test/example.csv.1, end oss_reg_test/example.csv.1, asyncmode  (seg0 slice1 192.168.0.45:25432 pid=12539)
+CONTEXT:  External table ossexample, file @@oss_host@@ 	filepath=oss_reg_test/example.csv id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@
+ count 
+-------
+    13
+(1 row)
+
+-- Test with multi spaces among params
+drop external table ossexample;
+create READABLE external table ossexample (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ filepath=oss_reg_test/example.csv              id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'csv';
+select count(*) from ossexample;
+NOTICE:  a total of 1 files will be loaded, begin oss_reg_test/example.csv.1, end oss_reg_test/example.csv.1, asyncmode  (seg0 slice1 192.168.0.45:25432 pid=12539)
+CONTEXT:  External table ossexample, file @@oss_host@@ filepath=oss_reg_test/example.csv              id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@
+ count 
+-------
+    13
+(1 row)
+
+--SELECT count(*) FROM ossexample;
+--SELECT sum(open) FROM ossexample;
+--SELECT avg(open) FROM ossexample;
+-- =======
+-- CLEANUP
+-- =======
+DROP EXTERNAL TABLE ossexample;

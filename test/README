@@ -1,0 +1,10 @@
+How to add a test case and generate the expected file ?
+
+1) put the runnable sql test case file xxx.sql under ./sql
+
+2) run gen_exp.sh xxx.sql
+
+3) you will get the xxx.sql.source under ./input.in and expected file under ./output.in
+
+4) add your case to all_schedule
+

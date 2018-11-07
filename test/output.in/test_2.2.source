@@ -1,0 +1,55 @@
+-- ========
+-- PROTOCOL
+-- ========
+drop external table ossexample;
+ERROR:  table "ossexample" does not exist
+create READABLE external table ossexample (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ filepath=oss_reg_test/example.csv id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'csv';
+create WRITABLE external table ossexample_exp (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ dir=oss_reg_test/expdir/ id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'csv';
+create WRITABLE external table ossexample_exp_prefix (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ prefix=oss_reg_test/expdir_prefix id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'csv';
+create READABLE external table ossexample_imp (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ dir=oss_reg_test/expdir/ id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'csv';
+create READABLE external table ossexample_imp_prefix (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ prefix=oss_reg_test/expdir_prefix id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'csv';
+SELECT count(*) FROM ossexample;
+NOTICE:  a total of 1 files will be loaded, begin oss_reg_test/example.csv.1, end oss_reg_test/example.csv.1, asyncmode  (seg0 slice1 192.168.0.45:25432 pid=10069)
+CONTEXT:  External table ossexample, file @@oss_host@@ filepath=oss_reg_test/example.csv id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@
+ count 
+-------
+    13
+(1 row)
+
+insert into ossexample_exp select * from ossexample;
+NOTICE:  a total of 1 files will be loaded, begin oss_reg_test/example.csv.1, end oss_reg_test/example.csv.1, asyncmode  (seg0 slice1 192.168.0.45:25432 pid=10079)
+CONTEXT:  External table ossexample, file @@oss_host@@ filepath=oss_reg_test/example.csv id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@
+NOTICE:  begin writiing data to oss directory oss_reg_test/expdir/, with block size 10 MB and oss file size 1024 MB  (seg0 192.168.0.45:25432 pid=10069)
+SELECT count(*) FROM ossexample_imp;
+NOTICE:  a total of 3 files will be loaded, asyncmode  (seg0 slice1 192.168.0.45:25432 pid=10069)
+CONTEXT:  External table ossexample_imp, file @@oss_host@@ dir=oss_reg_test/expdir/ id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@
+ count 
+-------
+    13
+(1 row)
+
+insert into ossexample_exp_prefix select * from ossexample;
+NOTICE:  a total of 1 files will be loaded, begin oss_reg_test/example.csv.1, end oss_reg_test/example.csv.1, asyncmode  (seg0 slice1 192.168.0.45:25432 pid=10079)
+CONTEXT:  External table ossexample, file @@oss_host@@ filepath=oss_reg_test/example.csv id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@
+NOTICE:  begin writiing data to oss directory oss_reg_test/expdir_prefix, with block size 10 MB and oss file size 1024 MB  (seg0 192.168.0.45:25432 pid=10069)
+SELECT count(*) FROM ossexample_imp_prefix;
+NOTICE:  a total of 3 files will be loaded, asyncmode  (seg0 slice1 192.168.0.45:25432 pid=10069)
+CONTEXT:  External table ossexample_imp_prefix, file @@oss_host@@ prefix=oss_reg_test/expdir_prefix id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@
+ count 
+-------
+    13
+(1 row)
+
+-- =======
+-- CLEANUP
+-- =======
+DROP EXTERNAL TABLE ossexample;
+DROP EXTERNAL TABLE ossexample_exp;
+DROP EXTERNAL TABLE ossexample_exp_prefix;
+DROP EXTERNAL TABLE ossexample_imp;
+DROP EXTERNAL TABLE ossexample_imp_prefix;

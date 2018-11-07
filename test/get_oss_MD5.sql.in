@@ -1,0 +1,6 @@
+create extension if not exists oss_ext;
+drop external table if exists get_oss_MD5 ;
+create READABLE external table get_oss_MD5 (a int) location('@@oss_host@@ filepath=oss_reg_test/example.csv.1 id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'csv';
+\d+ get_oss_MD5
+drop external table if exists get_oss_MD5 ;
+drop extension oss_ext;

@@ -1,0 +1,35 @@
+-- ========
+-- PROTOCOL
+-- ========
+drop external table ossexample;
+ERROR:  table "ossexample" does not exist
+create READABLE external table ossexample (date text, time text, open float, high float,
+        low float, volume int) location('@@oss_host@@ filepath=oss_reg_test/example.csv id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'csv';
+SELECT count(*) FROM ossexample;
+NOTICE:  a total of 1 files will be loaded, begin oss_reg_test/example.csv.1, end oss_reg_test/example.csv.1, asyncmode  (seg0 slice1 e010101082048.zmf:25432 pid=29859)
+CONTEXT:  External table ossexample, file @@oss_host@@ filepath=oss_reg_test/example.csv id=@@oss_id_MD5@@ key=@@oss_key_MD5@@ bucket=@@oss_bucket@@
+ count 
+-------
+    13
+(1 row)
+
+SELECT sum(open) FROM ossexample;
+NOTICE:  a total of 1 files will be loaded, begin oss_reg_test/example.csv.1, end oss_reg_test/example.csv.1, asyncmode  (seg0 slice1 e010101082048.zmf:25432 pid=29859)
+CONTEXT:  External table ossexample, file @@oss_host@@ filepath=oss_reg_test/example.csv id=@@oss_id_MD5@@ key=@@oss_key_MD5@@ bucket=@@oss_bucket@@
+ sum  
+------
+ 14.3
+(1 row)
+
+SELECT avg(open) FROM ossexample;
+NOTICE:  a total of 1 files will be loaded, begin oss_reg_test/example.csv.1, end oss_reg_test/example.csv.1, asyncmode  (seg0 slice1 e010101082048.zmf:25432 pid=29859)
+CONTEXT:  External table ossexample, file @@oss_host@@ filepath=oss_reg_test/example.csv id=@@oss_id_MD5@@ key=@@oss_key_MD5@@ bucket=@@oss_bucket@@
+ avg 
+-----
+ 1.1
+(1 row)
+
+-- =======
+-- CLEANUP
+-- =======
+DROP EXTERNAL TABLE ossexample;

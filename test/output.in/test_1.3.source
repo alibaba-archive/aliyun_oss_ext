@@ -1,0 +1,21 @@
+-- ========
+-- PROTOCOL
+-- ========
+drop external table ossexample3;
+ERROR:  table "ossexample3" does not exist
+create READABLE external table ossexample3 (date text, time text, open float, high float,
+	low float, volume int) location('@@oss_host@@ filepath=oss_reg_test/example3.csv id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@') format 'csv' LOG ERRORS SEGMENT REJECT LIMIT 5;
+SELECT count(*) FROM ossexample3;
+NOTICE:  a total of 1 files will be loaded, begin oss_reg_test/example3.csv.1, end oss_reg_test/example3.csv.1, asyncmode  (seg0 slice1 e010101082048.zmf:25432 pid=31459)
+CONTEXT:  External table ossexample3, file @@oss_host@@ filepath=oss_reg_test/example3.csv id=@@oss_id_MD5@@ key=@@oss_key_MD5@@ bucket=@@oss_bucket@@
+NOTICE:  Found 2 data formatting errors (2 or more input rows). Rejected related input data.
+ count 
+-------
+    13
+(1 row)
+
+--SELECT gp_read_error_log('ossexample3');
+-- =======
+-- CLEANUP
+-- =======
+DROP EXTERNAL TABLE ossexample3;

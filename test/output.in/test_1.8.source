@@ -1,0 +1,54 @@
+-- ========
+-- PROTOCOL
+-- ========
+DROP EXTERNAL TABLE kfossext;
+ERROR:  table "kfossext" does not exist
+CREATE READABLE EXTERNAL TABLE kfossext (
+    name text,
+    cardno text,
+    descriot text,
+    ctftp text,
+    ctfid text,
+    gender text,
+    birthday text,
+    address text,
+    zip text,
+    dirty text,
+    district1 text,
+    district2 text,
+    district3 text,
+    district4 text,
+    district5 text,
+    district6 text,
+    firstnm text,
+    lastnm text,
+    duty text,
+    mobile text,
+    tel text,
+    fax text,
+    email text,
+    nation text,
+    taste text,
+    education text,
+    company text,
+    ctel text,
+    caddress text,
+    czip text,
+    family text,
+    version text,
+    id text
+) LOCATION('@@oss_host@@ filepath=oss_reg_test/kf.csv id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@') FORMAT 'CSV' (HEADER) ENCODING 'UTF8' LOG ERRORS SEGMENT REJECT LIMIT 50;
+NOTICE:  HEADER means that each one of the data files has a header row.
+select count(*) from kfossext;
+NOTICE:  a total of 1 files will be loaded, begin oss_reg_test/kf.csv.1, end oss_reg_test/kf.csv.1, asyncmode  (seg0 slice1 192.168.0.45:25432 pid=3819)
+CONTEXT:  External table kfossext, file @@oss_host@@ filepath=oss_reg_test/kf.csv id=@@oss_id@@ key=@@oss_key@@ bucket=@@oss_bucket@@
+NOTICE:  Found 5 data formatting errors (5 or more input rows). Rejected related input data.
+ count 
+-------
+  4994
+(1 row)
+
+-- =======
+-- CLEANUP
+-- =======
+DROP EXTERNAL TABLE kfossext;
